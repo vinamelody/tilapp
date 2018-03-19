@@ -32,6 +32,8 @@ public func configure(
     // Configure migrations
     var migrations = MigrationConfig()
     migrations.add(model: Acronym.self, database: .sqlite)
+    migrations.add(model: User.self, database: .sqlite)
+    migrations.add(model: Category.self, database: .sqlite)
     services.register(migrations)
 
     // Configure the rest of your application here
