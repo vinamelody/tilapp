@@ -12,3 +12,9 @@ final class Category: Codable {
 extension Category: SQLiteModel {}
 extension Category: Migration {}
 extension Category: Content {}
+
+extension Category {
+    var acronyms: Siblings<Category, Acronym, AcronymCategoryPivot> {
+        return siblings()
+    }
+}
