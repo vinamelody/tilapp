@@ -1,4 +1,5 @@
 import Vapor
+import Fluent
 
 struct AcronymsController: RouteCollection {
     func boot(router: Router) throws {
@@ -11,6 +12,7 @@ struct AcronymsController: RouteCollection {
         acronymsRoute.get(Acronym.parameter, "creator", use: getCreatorHandler)
         acronymsRoute.get(Acronym.parameter, "categories", use: getCategoriesHandler)
         acronymsRoute.post(Acronym.parameter, "categories", Category.parameter, use: addCateogriesHandler)
+        acronymsRoute.get("search", use: searchHandler)
     }
     
     func getAllHandler(_ req: Request) throws -> Future<[Acronym]> {
@@ -57,6 +59,16 @@ struct AcronymsController: RouteCollection {
             let pivot = try AcronymCategoryPivot(acronym.requireID(), category.requireID())
             return pivot.save(on: req).transform(to: .ok)
         }
+    }
+    
+    func searchHandler(_ req: Request) throws -> Future<[Acronym]> {
+        guard let searchTerm = req.query[String.self, at: "term"] else {
+            throw Abort(.badRequest, reason: "Missing search term in request")
+        }
+        return Acronym.query(on: req).group(.or) { or in
+            or.filter(\.short == searchTerm)
+            or.filter(\.long == searchTerm)
+        }.all()
     }
 }
 
