@@ -1,4 +1,4 @@
-import FluentSQLite
+import FluentMySQL
 import Vapor
 
 final class Acronym: Codable {
@@ -14,7 +14,7 @@ final class Acronym: Codable {
     }
 }
 
-extension Acronym: SQLiteModel {
+extension Acronym: MySQLModel {
 //    typealias Database = SQLiteDatabase
 //    typealias ID = Int
 //    static let idKey: IDKey = \Acronym.id

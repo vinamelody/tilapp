@@ -1,4 +1,4 @@
-import FluentSQLite
+import FluentMySQL
 import Vapor
 
 /// Called before your application initializes.
@@ -10,7 +10,7 @@ public func configure(
     _ services: inout Services
 ) throws {
     // Register providers first
-    try services.register(FluentSQLiteProvider())
+    try services.register(FluentMySQLProvider())
 
     // Register routes to the router
     let router = EngineRouter.default()
@@ -26,15 +26,16 @@ public func configure(
 
     // Configure a SQLite database
     var databases = DatabaseConfig()
-    try databases.add(database: SQLiteDatabase(storage: .memory), as: .sqlite)
+    let database = MySQLDatabase(hostname: "localhost", user: "til", password: "password", database: "vapor" )
+    databases.add(database: database, as: .mysql)
     services.register(databases)
 
     // Configure migrations
     var migrations = MigrationConfig()
-    migrations.add(model: Acronym.self, database: .sqlite)
-    migrations.add(model: User.self, database: .sqlite)
-    migrations.add(model: Category.self, database: .sqlite)
-    migrations.add(model: AcronymCategoryPivot.self, database: .sqlite)
+    migrations.add(model: Acronym.self, database: .mysql)
+    migrations.add(model: User.self, database: .mysql)
+    migrations.add(model: Category.self, database: .mysql)
+    migrations.add(model: AcronymCategoryPivot.self, database: .mysql)
     services.register(migrations)
 
     // Configure the rest of your application here
