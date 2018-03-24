@@ -1,5 +1,6 @@
 import FluentMySQL
 import Vapor
+import Leaf
 
 /// Called before your application initializes.
 ///
@@ -39,4 +40,5 @@ public func configure(
     services.register(migrations)
 
     // Configure the rest of your application here
+    try services.register(LeafProvider())
 }
