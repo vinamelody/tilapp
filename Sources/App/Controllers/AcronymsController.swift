@@ -11,7 +11,7 @@ struct AcronymsController: RouteCollection {
         acronymsRoute.put(Acronym.parameter, use: updateHandler)
         acronymsRoute.get(Acronym.parameter, "creator", use: getCreatorHandler)
         acronymsRoute.get(Acronym.parameter, "categories", use: getCategoriesHandler)
-        acronymsRoute.post(Acronym.parameter, "categories", Category.parameter, use: addCateogriesHandler)
+        acronymsRoute.post(Acronym.parameter, "categories", Category.parameter, use: addCategoriesHandler)
         acronymsRoute.get("search", use: searchHandler)
     }
     
@@ -53,12 +53,23 @@ struct AcronymsController: RouteCollection {
         }
     }
     
-    func addCateogriesHandler(_ req: Request) throws -> Future<HTTPStatus> {
-        return try flatMap(to: HTTPStatus.self, req.parameter(Acronym.self), req.parameter(Category.self)) {
-            acronym, category in
-            let pivot = try AcronymCategoryPivot(acronym.requireID(), category.requireID())
-            return pivot.save(on: req).transform(to: .ok)
+    func addCategoriesHandler(_ req: Request) throws -> Future<HTTPStatus> {
+        return try req.parameter(Acronym.self).flatMap(to: HTTPStatus.self) { acronym in
+            return try req.parameter(Category.self).flatMap(to: HTTPStatus.self) { category in
+                let pivot = try AcronymCategoryPivot(acronym.requireID(), category.requireID())
+                return pivot.save(on: req).transform(to: .ok)
+            }
         }
+        
+        /* There's a bug in current MySQL beta this double flatmap in getting acronym, category wis causing
+         * FluentError.modelNotFound: No model with ID 1 was found (Model.swift:267)
+         * So, temporarily split the parameter extraction as above
+         */
+//        return try flatMap(to: HTTPStatus.self, req.parameter(Acronym.self), req.parameter(Category.self)) {
+//            acronym, category in
+//            let pivot = try AcronymCategoryPivot(acronym.requireID(), category.requireID())
+//            return pivot.save(on: req).transform(to: .ok)
+//        }
     }
     
     func searchHandler(_ req: Request) throws -> Future<[Acronym]> {
