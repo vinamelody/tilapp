@@ -1,13 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8"/>
-    <title>#(title) - Shalom!</title>
-</head>
-<body>
+#set("content") {
     <h1>#(acronym.short)</h1>
     <h2>#(acronym.long)</h2>
 
-    <p>Created by #(creator.name)</p>
-</body>
-</html>
+    <p>Created by <a href="/users/#(creator.id)">#(creator.name)</p></a>
+}
+#embed("base")

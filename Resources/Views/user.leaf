@@ -1,5 +1,7 @@
 #set("content") {
-    <h1>Acronyms</h1>
+    <h1>#(user.name)</h1>
+    <h2>#(user.username)</h2>
+
     #if(acronyms) {
         <table>
         <thead>
@@ -18,5 +20,4 @@
         <h2>There are no acronyms yet!</h2>
     }
 }
-
 #embed("base")
