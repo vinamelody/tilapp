@@ -20,7 +20,7 @@ struct AcronymsController: RouteCollection {
     }
     
     func createHandler(_ req: Request) throws -> Future<Acronym> {
-        let acronym = try req.content.decode(Acronym.self).await(on: req)
+        let acronym = try req.content.decode(Acronym.self)
         return acronym.save(on: req)
     }
     
@@ -43,7 +43,7 @@ struct AcronymsController: RouteCollection {
     
     func getCreatorHandler(_ req: Request) throws -> Future<User> {
         return try req.parameter(Acronym.self).flatMap(to: User.self, { acronym in
-            return acronym.creator.get(on: req)
+            return try acronym.creator.get(on: req)
         })
     }
     
@@ -76,9 +76,9 @@ struct AcronymsController: RouteCollection {
         guard let searchTerm = req.query[String.self, at: "term"] else {
             throw Abort(.badRequest, reason: "Missing search term in request")
         }
-        return Acronym.query(on: req).group(.or) { or in
-            or.filter(\.short == searchTerm)
-            or.filter(\.long == searchTerm)
+        return try Acronym.query(on: req).group(.or) { or in
+            try or.filter(\.short == searchTerm)
+            try or.filter(\.long == searchTerm)
         }.all()
     }
 }
