@@ -10,10 +10,8 @@ struct CategoriesController: RouteCollection {
     }
     
     func createHandler(_ req: Request) throws -> Future<Category> {
-        return try req.content.decode(Category.self).flatMap(to: Category.self, { category in
-            return category.save(on: req)
-        })
-        
+        let category = try req.content.decode(Category.self)
+        return category.save(on: req)
     }
     
     func getAllHandler(_ req: Request) throws -> Future<[Category]> {

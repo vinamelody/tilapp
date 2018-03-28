@@ -10,9 +10,8 @@ struct UsersController: RouteCollection {
     }
     
     func createHandler(_ req: Request) throws -> Future<User> {
-        return try req.content.decode(User.self).flatMap(to: User.self, { (user) in
-            return user.save(on: req)
-        })
+        let user = try req.content.decode(User.self)
+        return user.save(on: req)
     }
     
     func getAllHandler(_ req: Request) throws -> Future<[User]> {
