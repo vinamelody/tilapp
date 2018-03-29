@@ -7,6 +7,7 @@ struct WebsiteController: RouteCollection {
         router.get("acronyms", Acronym.parameter, use: acronymHandler)
         router.get("users", User.parameter, use: userHandler)
         router.get("users", use: allUserHandler)
+        router.get("categories", Category.parameter, use: categoryHandler)
     }
     
     func indexHandler(_ req: Request) throws -> Future<View> {
@@ -42,6 +43,15 @@ struct WebsiteController: RouteCollection {
             return try req.leaf().render("users", context)
         })
     }
+    
+    func categoryHandler(_ req: Request) throws -> Future<View> {
+        return try req.parameter(Category.self).flatMap(to: View.self) { category in
+            return try category.acronyms.query(on: req).all().flatMap(to: View.self) { acronyms in
+                let context = CategoryContext(title: category.name, acronyms: acronyms.isEmpty ? nil : acronyms)
+                return try req.leaf().render("category", context)
+            }
+        }
+    }
 }
 
 extension Request {
@@ -70,4 +80,9 @@ struct UserContext: Encodable {
 struct AllUsersContext: Encodable {
     let title: String
     let users: [User]?
+}
+
+struct CategoryContext: Encodable {
+    let title: String
+    let acronyms: [Acronym]?
 }

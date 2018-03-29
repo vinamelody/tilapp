@@ -3,7 +3,7 @@ import Vapor
 
 final class Category: Codable {
     var id: Int?
-    var name: String?
+    var name: String
     
     init(id: Int? = nil, name: String) {
         self.name = name
