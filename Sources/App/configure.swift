@@ -39,6 +39,7 @@ public func configure(
     migrations.add(model: User.self, database: .mysql)
     migrations.add(model: Category.self, database: .mysql)
     migrations.add(model: AcronymCategoryPivot.self, database: .mysql)
+    migrations.add(model: Token.self, database: .mysql)
     services.register(migrations)
 
     // Configure the rest of your application here
