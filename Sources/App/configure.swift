@@ -1,6 +1,7 @@
 import FluentMySQL
 import Vapor
 import Leaf
+import Authentication
 
 /// Called before your application initializes.
 ///
@@ -42,4 +43,7 @@ public func configure(
 
     // Configure the rest of your application here
     try services.register(LeafProvider())
+    try services.register(AuthenticationProvider())
+    
+    User.Public.defaultDatabase = .mysql
 }
