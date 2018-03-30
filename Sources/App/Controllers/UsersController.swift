@@ -10,10 +10,11 @@ struct UsersController: RouteCollection {
     }
     
     func createHandler(_ req: Request) throws -> Future<User> {
-        let user = try req.content.decode(User.self)
-        let hasher = try req.make(BCryptHasher.self)
-        user.password = try hasher.make(user.password)
-        return user.save(on: req)
+        return try req.content.decode(User.self).flatMap(to: User.self) { user in
+            let hasher = try req.make(BCryptHasher.self)
+            user.password = try hasher.make(user.password)
+            return user.save(on: req)
+        }
     }
     
     func getAllHandler(_ req: Request) throws -> Future<[User.Public]> {
