@@ -12,6 +12,9 @@ struct WebsiteController: RouteCollection {
         router.get("categories", use: allCategoriesHandler)
         router.get("create-acronym", use: createAcronymHandler)
         router.post("create-acronym", use: createAcronymPostHandler)
+        router.get("acronyms", Acronym.parameter, "edit", use: editAcronymHandler)
+        router.post("acronyms", Acronym.parameter, "edit", use: editAcronymPostHandler)
+        router.post("acronyms", Acronym.parameter, "delete", use: deleteAcronymHandler)
     }
     
     func indexHandler(_ req: Request) throws -> Future<View> {
@@ -83,6 +86,37 @@ struct WebsiteController: RouteCollection {
             }
         })
     }
+    
+    func editAcronymHandler(_ req: Request) -> Future<View> {
+        return User.query(on: req).all().flatMap(to: View.self) { users in
+            return try req.parameter(Acronym.self).flatMap(to: View.self) { acronym in
+                let context = EditAcronymContext(title: "Edit Acronym", acronym: acronym, users: users.isEmpty ? nil : users)
+                return try req.leaf().render("createAcronym", context)
+            }
+        }
+    }
+    
+    func editAcronymPostHandler(_ req: Request) throws -> Future<Response> {
+        return try flatMap(to: Response.self, req.parameter(Acronym.self), req.content.decode(AcronymPostData.self), { (acronym, data) in
+            acronym.short = data.acronymShort
+            acronym.long = data.acronymLong
+            acronym.creatorID = data.creator
+            
+            return acronym.save(on: req).map(to: Response.self) { acronym in
+                guard let id = acronym.id else {
+                    // Similar like creating acro
+                    return req.redirect(to: "/")
+                }
+                return req.redirect(to: "/acronyms/\(id)")
+            }
+        })
+    }
+    
+    func deleteAcronymHandler(_ req: Request) throws -> Future<Response> {
+        return try req.parameter(Acronym.self).flatMap(to: Response.self) { acronym in
+            return acronym.delete(on: req).transform(to: req.redirect(to: "/"))
+        }
+    }
 }
 
 extension Request {
@@ -133,4 +167,12 @@ struct AcronymPostData: Content {
     let acronymLong: String
     let acronymShort: String
     let creator: UUID
+}
+
+struct EditAcronymContext: Encodable {
+    let title: String
+    let acronym: Acronym
+    let users: [User]?
+    // add this so that we can return the same template as create
+    let editing = true
 }
