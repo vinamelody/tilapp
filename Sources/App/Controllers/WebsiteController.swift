@@ -87,13 +87,11 @@ struct WebsiteController: RouteCollection {
         })
     }
     
-    func editAcronymHandler(_ req: Request) -> Future<View> {
-        return User.query(on: req).all().flatMap(to: View.self) { users in
-            return try req.parameter(Acronym.self).flatMap(to: View.self) { acronym in
-                let context = EditAcronymContext(title: "Edit Acronym", acronym: acronym, users: users.isEmpty ? nil : users)
-                return try req.leaf().render("createAcronym", context)
-            }
-        }
+    func editAcronymHandler(_ req: Request) throws -> Future<View> {
+        return try flatMap(to: View.self, req.parameter(Acronym.self), User.query(on: req).all(), { (acronym, users) in
+            let context = EditAcronymContext(title: "Edit Acronym", acronym: acronym, users: users)
+            return try req.leaf().render("createAcronym", context)
+        })
     }
     
     func editAcronymPostHandler(_ req: Request) throws -> Future<Response> {
