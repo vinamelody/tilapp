@@ -14,11 +14,6 @@ public func configure(
     // Register providers first
     try services.register(FluentMySQLProvider())
 
-    // Register routes to the router
-    let router = EngineRouter.default()
-    try routes(router)
-    services.register(router, as: Router.self)
-
     // Register middleware
     var middlewares = MiddlewareConfig() // Create _empty_ middleware config
     middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
@@ -47,4 +42,9 @@ public func configure(
     try services.register(AuthenticationProvider())
     
     User.Public.defaultDatabase = .mysql
+    
+    // Register routes to the router, moved to bottom after adding user authentication
+    let router = EngineRouter.default()
+    try routes(router)
+    services.register(router, as: Router.self)
 }

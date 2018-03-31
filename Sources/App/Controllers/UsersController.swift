@@ -1,4 +1,5 @@
 import Vapor
+import Authentication
 
 struct UsersController: RouteCollection {
     func boot(router: Router) throws {
@@ -7,6 +8,10 @@ struct UsersController: RouteCollection {
         route.get(use: getAllHandler)
         route.get(User.Public.parameter, use: getHandler)
         route.get(User.parameter, "acronyms", use: getAcronymsHandler)
+        
+        let basicAuthMiddleware = User.basicAuthMiddleware(using: BCryptVerifier())
+        let basicAuthGroup = route.grouped(basicAuthMiddleware)
+        basicAuthGroup.post("login", use: loginHandler)
     }
     
     func createHandler(_ req: Request) throws -> Future<User> {
@@ -29,6 +34,12 @@ struct UsersController: RouteCollection {
         return try req.parameter(User.self).flatMap(to: [Acronym].self, { user in
             return try user.acronyms.query(on: req).all()
         })
+    }
+    
+    func loginHandler(_ req: Request) throws -> Future<Token> {
+        let user = try req.requireAuthenticated(User.self)
+        let token = try Token.generate(for: user)
+        return token.save(on: req)
     }
 }
 

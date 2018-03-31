@@ -32,3 +32,14 @@ extension Token {
         return try Token(token: random.base64EncodedString(), userID: user.requireID())
     }
 }
+
+import Authentication
+
+extension Token: Authentication.Token {
+    static let userIDKey: UserIDKey = \Token.userID
+    typealias UserType = User
+}
+
+extension Token: BearerAuthenticatable {
+    static let tokenKey: TokenKey = \Token.token
+}

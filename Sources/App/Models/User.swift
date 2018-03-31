@@ -45,3 +45,14 @@ extension User.Public: MySQLUUIDModel {
 }
 
 extension User.Public: Content { }
+
+import Authentication
+
+extension User: BasicAuthenticatable {
+    static let usernameKey: UsernameKey = \User.username
+    static let passwordKey: PasswordKey = \User.password
+}
+
+extension User: TokenAuthenticatable {
+    typealias TokenType = Token
+}
