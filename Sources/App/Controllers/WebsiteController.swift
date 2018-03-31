@@ -12,7 +12,8 @@ struct WebsiteController: RouteCollection {
         authSessionRoutes.get("users", use: allUserHandler)
         authSessionRoutes.get("categories", Category.parameter, use: categoryHandler)
         authSessionRoutes.get("categories", use: allCategoriesHandler)
-        
+        authSessionRoutes.get("login", use: loginHandler)
+        authSessionRoutes.post("login", use: loginPostHandler)
         
         let protectedRoutes = authSessionRoutes.grouped(RedirectMiddleware<User>(path: "/login"))
         protectedRoutes.get("create-acronym", use: createAcronymHandler)
@@ -119,6 +120,25 @@ struct WebsiteController: RouteCollection {
             return acronym.delete(on: req).transform(to: req.redirect(to: "/"))
         }
     }
+    
+    func loginHandler(_ req: Request) throws -> Future<View> {
+        let context = LoginContext(title: "Login")
+        return try req.leaf().render("login", context)
+    }
+    
+    func loginPostHandler(_ req: Request) throws -> Future<Response> {
+        return try req.content.decode(LoginPostData.self).flatMap(to: Response.self, { (data) in
+            let verifier = try req.make(BCryptVerifier.self)
+            return User.authenticate(username: data.username, password: data.password, using: verifier, on: req).map(to: Response.self, { (user) in
+                guard let user = user else {
+                    return req.redirect(to: "/login")
+                }
+                try req.authenticateSession(user)
+                // In real app, redirect to the page user wanted to visit
+                return req.redirect(to: "/")
+            })
+        })
+    }
 }
 
 extension Request {
@@ -175,3 +195,13 @@ struct EditAcronymContext: Encodable {
     // add this so that we can return the same template as create
     let editing = true
 }
+
+struct LoginContext: Encodable {
+    let title: String
+}
+
+struct LoginPostData: Content {
+    let username: String
+    let password: String
+}
+
