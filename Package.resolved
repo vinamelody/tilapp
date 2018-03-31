@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/vapor/core.git",
         "state": {
           "branch": null,
-          "revision": "5f6e98e5849314ead2a3434f02521a220b273942",
-          "version": "3.0.0"
+          "revision": "225aff2b69049f2a4d9a4aae71d27ba7fb083032",
+          "version": "3.0.1"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/vapor/leaf.git",
         "state": {
           "branch": null,
-          "revision": "198212bb2618bca661fed698632c182825899a39",
-          "version": "3.0.0-rc.2.1"
+          "revision": "3e6027371aeaf780e447d2100eae173f1a6ae30f",
+          "version": "3.0.0-rc.2.1.1"
         }
       },
       {
